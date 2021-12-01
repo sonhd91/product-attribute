@@ -6,14 +6,13 @@
     <field name="inherit_id" ref="product.product_normal_form_view" />
     <field name="arch" type="xml">
 
-      <header position="inside">
+<!--       <header position="inside">
         <field
-                    name="status"
+                    name="product_state_id"
                     widget="statusbar"
                     attrs="{'invisible': [('sale_ok', '=', False)]}"
                 />
-        <field name="product_state_id" invisible="1" />
-      </header>
+      </header> -->
 
       <group name="sale" position="inside">
         <group name="product_status_wrapper">
@@ -21,7 +20,7 @@
             <field name="new_until" />
             <field name="discontinued_until" />
             <field name="end_of_life_date" />
-            <field name="status_display" />
+            <field name="state" />
           </group>
           <div class="alert alert-info" role="alert" colspan="2">
             By order of importance, the status is computed by:<br />
@@ -45,7 +44,7 @@
     <field name="inherit_id" ref="product.product_product_tree_view" />
     <field name="arch" type="xml">
       <field name="uom_id" position="after">
-        <field name="status" />
+        <field name="product_state_id" />
       </field>
     </field>
   </record>

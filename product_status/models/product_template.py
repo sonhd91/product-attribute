@@ -4,20 +4,10 @@
 from odoo import api, fields, models
 
 
-class ProductProduct(models.Model):
+class ProductTemplate(models.Model):
 
-    _inherit = "product.product"
+    _inherit = "product.template"
 
-    status = fields.Many2one(
-        "product.state",
-        string="Status (Header)",
-        compute="_compute_status",
-    )
-    # So the status can be displayed in the form and in the header
-    # Without conflict
-    # Odoo UI cannot represent properly the same fields twice in the
-    # same form with 2 different widgets, see github issues #43598
-    status_display = fields.Many2one(related="status", string="Status", readonly=True)
     end_of_life_date = fields.Date(
         string="End-of-life",
         help="When the product is end-of-life, and you want to warn your "
@@ -45,24 +35,25 @@ class ProductProduct(models.Model):
             if rec.discontinued_until:
                 rec.update({"new_until": False})
 
-    @api.depends("new_until", "end_of_life_date", "discontinued_until")
-    def _compute_status(self):
+    @api.depends(
+        "product_state_id", "new_until", "end_of_life_date", "discontinued_until"
+    )
+    def _compute_product_state(self):
         today = fields.Date.today()
         for record in self:
             if record.end_of_life_date:
                 if record.end_of_life_date < today:
-                    record.status = self.env.ref(
-                        "product_status.product_state_endoflife"
-                    ).id
+                    record.state = "endoflife"
                 else:
-                    record.status = self.env.ref(
-                        "product_status.product_state_phaseout"
-                    ).id
+                    record.state = "phaseout"
             elif record.discontinued_until and record.discontinued_until >= today:
-                record.status = self.env.ref(
-                    "product_status.product_state_discontinued"
-                ).id
+                record.state = "discontinued"
             elif record.new_until and record.new_until >= today:
-                record.status = self.env.ref("product_status.product_state_new").id
+                record.state = "new"
             else:
-                record.status = False
+                record.state = record._get_default_product_state()
+            # This is not triggered when assigning value in code.
+            record._inverse_product_state()
+
+    def _get_default_product_state(self):
+        return self.env["product.state"].search([("default", "=", True)], limit=1).code

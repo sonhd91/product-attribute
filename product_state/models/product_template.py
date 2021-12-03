@@ -22,7 +22,7 @@ class ProductTemplate(models.Model):
         help="Select a state for this product",
         group_expand="_read_group_state_id",
         inverse="_inverse_product_state_id",
-        default=lambda self: self._get_default_product_state_id(),
+        default=lambda self: self._get_default_product_state().id,
         index=True,
         tracking=10,
     )
@@ -34,8 +34,8 @@ class ProductTemplate(models.Model):
         """
 
     @api.model
-    def _get_default_product_state_id(self):
-        return self.env["product.state"].search([("default", "=", True)], limit=1).id
+    def _get_default_product_state(self):
+        return self.env["product.state"].search([("default", "=", True)], limit=1)
 
     @api.depends("product_state_id")
     def _compute_product_state(self):
@@ -49,7 +49,9 @@ class ProductTemplate(models.Model):
                 [("code", "=", product_tmpl.state)], limit=1
             )
             if product_tmpl.state and not product_state:
-                product_state = ProductState.create({"name": product_tmpl.state})
+                product_state = ProductState.create(
+                    {"name": product_tmpl.state, "code": product_tmpl.state}
+                )
             product_tmpl.product_state_id = product_state.id
 
     @api.model

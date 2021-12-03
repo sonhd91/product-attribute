@@ -57,6 +57,8 @@
                     </group>
                     <group string="Description">
                         <field name="description" nolabel="1" />
+                        <field name="default" widget="boolean_toggle" />
+                        <field name="active" widget="boolean_toggle" />
                     </group>
                 </sheet>
             </form>

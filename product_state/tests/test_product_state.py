@@ -82,3 +82,7 @@ class TestProductState(SavepointCase):
             )
             wn_expect = cm.exception.args[0]
             self.assertEqual("There should be only one default state", wn_expect)
+
+    def test_04_new_state(self):
+        self.product.state = "new_code"
+        self.assertEqual(self.product.product_state_id.code, "new_code")
